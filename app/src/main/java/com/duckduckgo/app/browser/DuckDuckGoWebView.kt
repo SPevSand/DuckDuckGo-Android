@@ -19,6 +19,7 @@ package com.duckduckgo.app.browser
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
@@ -26,6 +27,7 @@ import android.webkit.WebView
 import androidx.core.view.NestedScrollingChild
 import androidx.core.view.NestedScrollingChildHelper
 import androidx.core.view.ViewCompat
+import kotlin.math.abs
 
 /**
  * WebView subclass which allows the WebView to
@@ -48,9 +50,15 @@ class DuckDuckGoWebView : WebView, NestedScrollingChild {
     private var nestedOffsetY: Int = 0
     private var nestedScrollHelper: NestedScrollingChildHelper = NestedScrollingChildHelper(this)
 
+    private var actionBarHeight: Int = 0
+
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         isNestedScrollingEnabled = true
+        val tv = TypedValue()
+        if (context.theme.resolveAttribute(androidx.appcompat.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, resources.displayMetrics)
+        }
     }
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
@@ -170,6 +178,16 @@ class DuckDuckGoWebView : WebView, NestedScrollingChild {
 
         enableSwipeRefresh(canSwipeToRefresh && clampedY && scrollY == 0 && (lastDeltaY <= 0 || nestedOffsetY == 0))
         super.onOverScrolled(scrollX, scrollY, clampedX, clampedY)
+    }
+
+    override fun overScrollBy(deltaX: Int, deltaY: Int, scrollX: Int, scrollY: Int, scrollRangeX: Int, scrollRangeY: Int, maxOverScrollX: Int, maxOverScrollY: Int, isTouchEvent: Boolean): Boolean {
+
+        // if the search bar is in the closing/opening state, then we block the webview scrolling
+        if(nestedOffsetY != 0 && abs(nestedOffsetY) != actionBarHeight){
+            return false
+        }
+
+        return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent)
     }
 
     fun setEnableSwipeRefreshCallback(callback: (Boolean) -> Unit) {
