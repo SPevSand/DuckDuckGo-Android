@@ -27,8 +27,7 @@
     <!-- Widget colors -->
     <color name="divider">@color/subtleGrayTwo</color>
     <color name="slightlyTransparentDivider">#1A000000</color>
-    <color name="webViewScrollbarTrackColor">#ff333333</color>ñ
-    <color name="webViewScrollbarThumbColor">#ffababab</color>
+    <color name="webViewScrollbarThumbColor">#80808080</color>
 
     <!-- Universal -->
     <color name="dimmed">#99000000</color>
